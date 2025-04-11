@@ -106,6 +106,10 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
                 )}
             </button>
         </div>
+        {/* ✅ Password guidelines */}
+        <p className="mt-1 text-xs text-gray-300">
+          Password must be at least 8 characters and include an uppercase, lowercase, number, and special character.
+        </p>
       </div>
 
       {/* Remember Me + Forgot Password */}
