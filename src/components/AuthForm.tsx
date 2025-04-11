@@ -51,6 +51,10 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
       } else {
         await login(email, password, redirectUrl);
       }
+
+      // Redirect after successful login/signup
+      window.location.href = redirectUrl;
+
     } catch (err: any) {
       const friendly = mapFirebaseError(err.code);
       setError(friendly);

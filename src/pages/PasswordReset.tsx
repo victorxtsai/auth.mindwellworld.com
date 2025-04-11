@@ -3,7 +3,7 @@ import AuthLayout from '@/src/components/AuthLayout';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/src/firebaseConfig';
 
-export default function ForgotPassword() {
+export default function PasswordReset() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
