@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
 import { useFirebaseAuth } from '@/src/hooks/useFirebaseAuth';
 import { Link } from 'react-router-dom';
-import { getAuth } from 'firebase/auth';
 
 interface AuthFormProps {
   mode: 'signin' | 'signup';
@@ -16,7 +15,6 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const auth = getAuth();
 
   const mapFirebaseError = (code: string) => {
     switch (code) {
@@ -35,35 +33,32 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
         return 'Something went wrong. Please try again.';
     }
   };
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
   
     try {
-      // Save or remove email
+      // Save or remove email for "Remember me"
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email);
       } else {
         localStorage.removeItem('rememberedEmail');
       }
   
+      // Call correct auth flow
       if (mode === 'signup') {
         await register(email, password, redirectUrl);
       } else {
         await login(email, password, redirectUrl, rememberMe);
       }
-      
-      // Get ID token
-      const user = auth.currentUser;
-      if (!user) throw new Error("User not found after login");
-
+  
     } catch (err: any) {
       const friendly = mapFirebaseError(err.code);
       setError(friendly);
     }
   };
+
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

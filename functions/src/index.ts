@@ -1,55 +1,78 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import * as cookie from 'cookie';
-import cors from 'cors';
+import corsLib from 'cors';
 
 admin.initializeApp();
+const cors = corsLib({ origin: true, credentials: true });
 
-const corsHandler = cors({
-    origin: true,
-    credentials: true,
-  });
-const SESSION_COOKIE_MAX_AGE = 60 * 60 * 24 * 5 * 1000; // 5 days
-
-export const createSession = functions.https.onRequest((req, res) => {
-  corsHandler(req, res, async () => {
-    const idToken = req.body?.idToken;
-
-    if (!idToken) {
-      res.status(401).json({ error: 'Missing or invalid ID token' });
-      return;
-    }
-
+export const setSession = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
     try {
-      const sessionCookie = await admin.auth().createSessionCookie(idToken, {
-        expiresIn: SESSION_COOKIE_MAX_AGE,
+      const token = req.query.token as string;
+      const redirect = (req.query.redirect as string) || 'https://mindwell.io';
+
+      if (!token) {
+        res.status(400).send('Missing token');
+        return;
+      }
+
+      const sessionCookie = await admin.auth().createSessionCookie(token, {
+        expiresIn: 60 * 60 * 24 * 5 * 1000, // 5 days
       });
 
-      // Dynamically detect cookie domain from origin
-      const origin = req.headers.origin || '';
-      let cookieDomain = '.mindwell.io';
-      if (origin.includes('mindwellworld.com')) {
-        cookieDomain = '.mindwellworld.com';
-      }
-      
-      // ✅ Debug logs go here
-      console.log('[createSession] origin:', origin);
-      console.log('[createSession] setting cookie for domain:', cookieDomain);
-
-      // Set cookie
       res.setHeader('Set-Cookie', cookie.serialize('session', sessionCookie, {
         httpOnly: true,
         secure: true,
-        sameSite: 'lax',
+        sameSite: 'none',
         path: '/',
-        domain: cookieDomain,
-        maxAge: SESSION_COOKIE_MAX_AGE / 1000,
+        maxAge: 60 * 60 * 24 * 5,
       }));
 
-      res.status(200).json({ status: 'success' });
-    } catch (error) {
-      console.error('[createSession] error', error);
-      res.status(401).json({ error: 'Unauthorized' });
+      res.redirect(302, redirect);
+    } catch (err) {
+      console.error('[setSession] Error:', err);
+      res.status(500).send('Failed to create session');
     }
   });
 });
+
+export const checkAuth = functions.https.onRequest((req, res) => {
+  cors(req, res, async () => {
+    const cookies = cookie.parse(req.headers.cookie || '');
+    const session = cookies.session || '';
+
+    try {
+      const decoded = await admin.auth().verifySessionCookie(session, true);
+      res.status(200).send({ uid: decoded.uid, email: decoded.email });
+    } catch (error) {
+      res.status(401).send('Unauthorized');
+    }
+  });
+});
+
+
+export const logout = functions.https.onRequest((req, res) => {
+  res.setHeader(
+    'Set-Cookie',
+    cookie.serialize('session', '', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none', // MUST be lowercase
+      path: '/',
+      expires: new Date(0), // Expire immediately
+    })
+  );
+
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  res.status(200).send('Logged out');
+});
+

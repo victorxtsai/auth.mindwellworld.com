@@ -14,7 +14,7 @@ import { auth } from '@/src/firebaseConfig';
 const callCreateSession = async (user: User, redirectUrl: string = '/') => {
   const idToken = await user.getIdToken();
 
-  const firebaseFunctionURL = `https://us-central1-mindwell-world.cloudfunctions.net/setSession`;
+  const firebaseFunctionURL = `https://auth.mindwellworld.com/setSession`;
   const mobileDeepLink = `mindwellapp://setSession?token=${idToken}`;
 
   const isValidRedirect =
@@ -28,14 +28,13 @@ const callCreateSession = async (user: User, redirectUrl: string = '/') => {
     ? `${firebaseFunctionURL}?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`
     : mobileDeepLink;
 
-  // Try mobile deep link or web version of setSession
   window.location.href = deepLinkURL;
 
-  // ⏳ Fallback to web after 1s if mobile doesn't handle it
   setTimeout(() => {
     window.location.href = `${firebaseFunctionURL}?token=${idToken}&redirect=${encodeURIComponent(fallbackRedirect)}`;
   }, 1000);
 };
+
 
 
 export function useFirebaseAuth() {

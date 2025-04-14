@@ -4,20 +4,16 @@ Vite + React + Tailwind CSS 4.0
 npm create vite@latest .
 npm install tailwindcss @tailwindcss/vite
 
-
-
 Git steps for MASTER BRNACH
 git status
 git add -A
 git commit -m "valid"
 git push
 
-
 git status
 git add -A
 git commit -m "20250408 - MASSIVE CODE CLEAN UP"
 git push
-
 
 View Website
 npm run dev
