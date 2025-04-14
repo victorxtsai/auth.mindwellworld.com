@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2020",                     // ✔️ Compatible with modern Firebase Node runtimes
     "lib": ["ES2020"],
-    "module": "NodeNext",
+    "module": "commonjs",                  // 🔁 CHANGE THIS from "NodeNext" to "commonjs"
+    "moduleResolution": "node",            // 🔁 CHANGE THIS from "nodenext" to "node"
     "esModuleInterop": true,
-    "moduleResolution": "nodenext",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "lib",
+    "outDir": "lib",                       // ✔️ Matches "main" in package.json
+    "rootDir": "src",                      // ✅ Ensures clean src/lib structure
     "sourceMap": true,
     "strict": true,
-    "skipLibCheck": true  // ✅ THIS FIXES THE TS INT32ARRAY ERROR
+    "skipLibCheck": true                   // ✅ Keeps build clean (Firebase approved)
   },
   "compileOnSave": true,
   "include": ["src"],
-  "exclude": ["../node_modules", "../src"] // ✅ AVOIDS REACT TYPES LEAKING IN
+  "exclude": ["../node_modules", "../src"] // ✔️ Optional: makes sure React types don’t bleed in
 }

@@ -22,3 +22,5 @@ Build Website
 npm run build
 cp dist/index.html dist/404.html
 npm run deploy
+
+firebase deploy --only hosting:auth-mindwellworld-com
