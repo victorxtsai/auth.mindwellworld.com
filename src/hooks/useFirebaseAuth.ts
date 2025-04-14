@@ -6,6 +6,7 @@ import {
   OAuthProvider,
   sendEmailVerification,
   User,
+  setPersistence, browserLocalPersistence, browserSessionPersistence
 } from 'firebase/auth';
 import { auth } from '@/src/firebaseConfig';
 
@@ -38,7 +39,8 @@ const callCreateSession = async (user: User, redirectUrl: string = '/') => {
 
 
 export function useFirebaseAuth() {
-  const login = async (email: string, password: string, redirectUrl: string = '/') => {
+  const login = async (email: string, password: string, redirectUrl: string = '/', rememberMe: boolean) => {
+    await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     await callCreateSession(userCredential.user, redirectUrl);
   };

@@ -52,7 +52,7 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
       if (mode === 'signup') {
         await register(email, password, redirectUrl);
       } else {
-        await login(email, password, redirectUrl);
+        await login(email, password, redirectUrl, rememberMe);
       }
       
       // Get ID token
