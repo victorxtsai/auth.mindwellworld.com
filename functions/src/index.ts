@@ -40,7 +40,8 @@ export const setSession = functions.https.onRequest((req, res) => {
         res.redirect(302, `${redirect}?token=${token}`);
       } else {
         // Web redirect
-        res.redirect(302, redirect);
+        const encodedRedirect = encodeURIComponent(redirect);
+        res.redirect(`/redirect?redirect=${encodedRedirect}`);
       }
     } catch (err) {
       console.error('[setSession] Error:', err);
