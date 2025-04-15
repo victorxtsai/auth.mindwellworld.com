@@ -28,7 +28,8 @@ const callCreateSession = async (user: User, redirectUrl: string = '/') => {
   const isMobile = redirectUrl.startsWith('mindwellapp://');
   const sessionURL = isMobile
     ? `mindwellapp://setSession?token=${idToken}`
-    : `https://${domain}/api/setSession?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`;
+    : `https://${domain}/redirect?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`;
+
 
   // Go to domain to set the cookie
   window.location.href = sessionURL;
