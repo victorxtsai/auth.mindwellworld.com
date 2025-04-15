@@ -11,7 +11,7 @@ export default function SignIn() {
     const params = new URLSearchParams(window.location.search);
     const redirectParam = params.get('redirect');
     console.log('🔍 redirect param:', redirectParam);
-    const allowedDomains = ['mindwell.io', 'mel.mindwell.io', 'mel.ai', 'mindwellworld.com'];
+    const allowedDomains = ['mindwell.io', 'mel.mindwell.io', 'mel.ai', 'mindwellworld.com', 'auth.mindwellworld.com'];
     try {
       if (redirectParam) {
         const url = new URL(redirectParam);
@@ -25,7 +25,7 @@ export default function SignIn() {
       console.error('Invalid redirect param:', e);
     }
   }, [location.search]);
-  
+
   return (
     <AuthLayout title="Sign In">
       <AuthForm mode="signin" redirectUrl={redirectUrl} />
