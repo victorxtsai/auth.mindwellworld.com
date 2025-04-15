@@ -8,6 +8,7 @@ export default function SignIn() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const redirectParam = params.get('redirect');
+    console.log('🔍 redirect param:', redirectParam);
     if (redirectParam) setRedirectUrl(redirectParam);
   }, []);
 
