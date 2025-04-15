@@ -24,3 +24,16 @@ cp dist/index.html dist/404.html
 npm run deploy
 
 firebase deploy
+
+
+
+---
+
+Step	Domain	Check
+1. Login happens at	auth.mindwellworld.com	Email/password or OAuth completes
+2. Redirect goes to	https://mindwell.io/redirect?token=...&redirect=...	✅ token + redirect URL present
+3. mindwell.io/redirect page does	fetch('/api/setSession?token=...')	✅ credentials: 'include'
+4. /api/setSession sets cookie	Set-Cookie: session=...	✅ SameSite=Lax, Secure, HttpOnly, Path=/
+5. Then redirect to	Final app page	✅ user lands on dashboard or home
+6. App loads & checks auth via	fetch('/api/checkAuth', { credentials: 'include' })	✅ returns 200 + user info
+7. Cookie visible in devtools	Application → Cookies → https://mindwell.io	✅ session present
