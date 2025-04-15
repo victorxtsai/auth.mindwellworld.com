@@ -210,6 +210,12 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
           </>
         )}
       </div>
+
+      <a
+  href="https://auth.mindwellworld.com/login?redirectToCheckout=true&tier=cloud_monthly"  
+>
+  Buy Cloud Monthly (Test)
+</a>
     </form>
   );
 }

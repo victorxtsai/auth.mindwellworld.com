@@ -5,6 +5,9 @@ import corsLib from 'cors';
 
 admin.initializeApp();
 
+export { startCheckoutSession } from './startCheckoutSession';
+export { revenuecatWebhook } from './revenuecatWebhook';
+
 const cors = corsLib({ origin: true, credentials: true });
 
 export const setSession = functions.https.onRequest((req, res) => {
