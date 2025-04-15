@@ -27,7 +27,10 @@
       { "source": "/setSession", "function": "setSession" },
       { "source": "/checkAuth", "function": "checkAuth" },
       { "source": "/logout", "function": "logout" },
-      { "source": "**", "destination": "/index.html" }
+      { "source": "/api/startCheckoutSession", "function": "startCheckoutSession"},
+      { "source": "/api/revenuecatWebhook", "function": "revenuecatWebhook"},
+      { "source": "**", "destination": "/index.html" },
+
     ]
   }
 }
