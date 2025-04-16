@@ -1,63 +1,64 @@
-import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
+
 
 export const startCheckoutSession = functions.https.onRequest(async (req, res) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    res.status(401).send('Missing or invalid Authorization header');
-    return;
-  }
-
-  const idToken = authHeader.split('Bearer ')[1];
-
-  let firebaseUID = '';
   try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      functions.logger.error('❌ Missing or invalid Authorization header');
+      res.status(401).send('Missing Authorization header');
+      return;
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    firebaseUID = decodedToken.uid;
-  } catch (err) {
-    functions.logger.error('[startCheckoutSession] Invalid token:', err);
-    res.status(403).send('Invalid Firebase token');
-    return;
-  }
+    const uid = decodedToken.uid;
 
-  const { tier } = req.body;
-  if (!tier) {
-    res.status(400).send('Missing tier');
-    return;
-  }
+    const { tier } = req.body;
+    if (!tier) {
+      functions.logger.error('❌ Missing tier in request body');
+      res.status(400).send('Missing subscription tier');
+      return;
+    }
 
-  const RC_API_KEY = functions.config().revenuecat.api_key;
+    const rcKey = functions.config().revenuecat.api_key;
 
-  try {
-    const response = await fetch('https://api.revenuecat.com/v1/stripe/checkout_sessions', {
+    functions.logger.info('✅ Starting checkout for:', { uid, tier });
+
+    const rcRes = await fetch('https://api.revenuecat.com/v1/stripe/checkout_sessions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${RC_API_KEY}`,
+        Authorization: `Bearer ${rcKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        app_user_id: firebaseUID,
+        app_user_id: uid,
         offering_id: tier,
         success_url: 'https://mindwell.io', // where user goes if payment successful
         cancel_url: 'https://mindwellworld.com', // where user goes if payment failes
       }),
     });
+    
 
-    const data = await response.json() as { data?: { url?: string } };
+    const rcData = await rcRes.json() as any;
 
-    if (!data?.data?.url) {
-      functions.logger.error('[startCheckoutSession] Invalid RevenueCat response:', data);
-      res.status(500).send('Failed to create checkout session');
+    if (!rcData?.data?.url) {
+      functions.logger.error('❌ Invalid response from RevenueCat:', rcData);
+      res.status(500).send('Invalid response from RevenueCat');
       return;
     }
 
-    // Optionally: Redirect directly instead of returning JSON
-    res.status(200).send({ checkoutUrl: data.data.url });
+    res.status(200).send({ checkoutUrl: rcData.data.url });
     return;
   } catch (err) {
-    functions.logger.error('[startCheckoutSession] Error:', err);
-    res.status(500).send('Internal Server Error');
-    return;
+    functions.logger.error('❌ Unhandled error in startCheckoutSession:', err);
+    if (err instanceof Error) {
+      res.status(500).send(err.message);
+      return;
+    } else {
+      res.status(500).send('Unexpected server error');
+      return;
+    }
   }
 });

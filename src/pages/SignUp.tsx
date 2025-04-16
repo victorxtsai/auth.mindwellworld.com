@@ -6,10 +6,11 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function SignUp() {
   const [redirectUrl, setRedirectUrl] = useState('/');
+  const [hasAttemptedCheckout, setHasAttemptedCheckout] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    const params = new URLSearchParams(location.search);
     const redirectParam = params.get('redirect');
     const shouldRedirectToCheckout = params.get('redirectToCheckout') === 'true';
     const tier = params.get('tier');
@@ -18,17 +19,17 @@ export default function SignUp() {
     console.log('🛒 shouldRedirectToCheckout:', shouldRedirectToCheckout);
     console.log('🏷️ tier:', tier);
 
-    // ✅ Accept all redirects now
     if (redirectParam) {
       setRedirectUrl(redirectParam);
     }
 
-    // 👇 Stripe checkout after signup
-    if (shouldRedirectToCheckout && tier) {
+    if (shouldRedirectToCheckout && tier && !hasAttemptedCheckout) {
       const auth = getAuth();
 
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
+          setHasAttemptedCheckout(true); // ✅ Prevent multiple runs
+
           try {
             const idToken = await user.getIdToken();
 
@@ -42,6 +43,11 @@ export default function SignUp() {
               body: JSON.stringify({ tier }),
             });
 
+            if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(errorText);
+            }
+
             const { checkoutUrl } = await res.json();
             if (checkoutUrl) {
               window.location.href = checkoutUrl;
@@ -51,15 +57,14 @@ export default function SignUp() {
           } catch (err) {
             console.error('❌ Error starting checkout session:', err);
           } finally {
-            unsubscribe(); // ✅ Clean up
+            unsubscribe();
           }
         }
       });
 
-      return () => unsubscribe(); // clean up on unmount
+      return () => unsubscribe();
     }
-  }, [location.search]);
-
+  }, [location.search, hasAttemptedCheckout]);
 
   return (
     <AuthLayout title="Create An Account">

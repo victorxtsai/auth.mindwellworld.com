@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 
 export default function SignIn() {
   const [redirectUrl, setRedirectUrl] = useState('/');
+  const [hasAttemptedCheckout, setHasAttemptedCheckout] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
@@ -18,17 +19,17 @@ export default function SignIn() {
     console.log('🛒 shouldRedirectToCheckout:', shouldRedirectToCheckout);
     console.log('🏷️ tier:', tier);
 
-    // ✅ Accept any redirect URL now (no validation)
     if (redirectParam) {
       setRedirectUrl(redirectParam);
     }
 
-     // 👇 NEW: Trigger Stripe checkout after login if redirectToCheckout is true
-    if (shouldRedirectToCheckout && tier) {
+    if (shouldRedirectToCheckout && tier && !hasAttemptedCheckout) {
       const auth = getAuth();
 
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
+          setHasAttemptedCheckout(true); // ✅ Prevent future calls
+
           try {
             const idToken = await user.getIdToken();
 
@@ -42,6 +43,11 @@ export default function SignIn() {
               body: JSON.stringify({ tier }),
             });
 
+            if (!res.ok) {
+              const errorText = await res.text();
+              throw new Error(errorText);
+            }
+
             const { checkoutUrl } = await res.json();
             if (checkoutUrl) {
               window.location.href = checkoutUrl;
@@ -51,14 +57,14 @@ export default function SignIn() {
           } catch (err) {
             console.error('❌ Error starting checkout session:', err);
           } finally {
-            unsubscribe(); // clean up
+            unsubscribe();
           }
         }
       });
 
-      return () => unsubscribe(); // clean up on unmount
+      return () => unsubscribe();
     }
-  }, [location.search]);
+  }, [location.search, hasAttemptedCheckout]);
 
   return (
     <AuthLayout title="Sign In">
