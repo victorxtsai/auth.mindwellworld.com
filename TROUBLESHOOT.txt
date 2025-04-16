@@ -27,6 +27,7 @@ BUILD BACKEND
 firebase deploy
 
 firebase functions:secrets:access REVENUECAT_API_KEY
+firebase functions:secrets:access STRIPE_SECRET_KEY
 
 
 ---

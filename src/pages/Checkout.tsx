@@ -28,7 +28,7 @@ export default function CheckoutPage() {
       try {
         const idToken = await user.getIdToken();
 
-        const res = await fetch('/api/startCheckoutSession', {
+        const res = await fetch('/api/startStripeCheckoutSession', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

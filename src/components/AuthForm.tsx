@@ -17,6 +17,8 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const mapFirebaseError = (code: string) => {
     switch (code) {
@@ -40,6 +42,7 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
     console.log("AuthForm | handleSubmit", mode)
     e.preventDefault();
     setError('');
+    setIsSubmitting(true); // prevent multiple presses
   
     try {
       // Save or remove email for "Remember me"
@@ -70,6 +73,7 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
     } catch (err: any) {
       const friendly = mapFirebaseError(err.code);
       setError(friendly);
+      setIsSubmitting(false); // allow retry
     }
   };
 
@@ -151,9 +155,11 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
       {/* Submit */}
       <button
         type="submit"
-        className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        disabled={isSubmitting}
+        className={`flex w-full justify-center rounded-md px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 
+                    ${isSubmitting ? 'bg-gray-400' : 'bg-indigo-600 hover:bg-indigo-500'}`}
       >
-        {mode === 'signup' ? 'Sign Up' : 'Sign In'}
+        {isSubmitting ? 'One Sec...' : mode === 'signup' ? 'Sign Up' : 'Sign In'}
       </button>
 
       {/* Social Login */}

@@ -1,6 +1,7 @@
 import * as admin from 'firebase-admin';
 import { onRequest } from 'firebase-functions/v2/https';
 import { defineSecret } from 'firebase-functions/params';
+import * as functions from 'firebase-functions';
 
 // Define your secret
 const REVENUECAT_API_KEY = defineSecret('REVENUECAT_API_KEY');
@@ -49,10 +50,26 @@ export const startCheckoutSession = onRequest(
         }),
       });
 
-      const rcData = await rcRes.json() as any;
+      // Always log the raw response body, not parsed yet
+      const rawBody = await rcRes.text();
+      functions.logger.error('❌ RevenueCat raw response body:', rawBody);
 
-      if (!rcData?.data?.url) {
-        res.status(500).send('Invalid response from RevenueCat');
+      // Try to parse
+      let rcData: any;
+      try {
+        rcData = JSON.parse(rawBody);
+      } catch (err) {
+        functions.logger.error('❌ Failed to parse RevenueCat JSON:', err);
+        res.status(500).send('Invalid JSON from RevenueCat');
+        return;
+      }
+
+      // Log status for better debugging
+      functions.logger.error('❌ RevenueCat status:', rcRes.status);
+
+      if (!rcRes.ok || !rcData?.data?.url) {
+        functions.logger.error('❌ Invalid or unexpected response from RevenueCat:', rcData);
+        res.status(500).send(`RevenueCat error: ${rcData?.message || 'Unknown error'}`);
         return;
       }
 

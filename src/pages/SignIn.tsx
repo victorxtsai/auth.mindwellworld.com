@@ -32,7 +32,7 @@ export default function SignIn() {
           try {
             const idToken = await user.getIdToken();
 
-            const res = await fetch('/api/startCheckoutSession', {
+            const res = await fetch('/api/startStripeCheckoutSession', {
               method: 'POST',
               credentials: 'include',
               headers: {
