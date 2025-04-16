@@ -6,9 +6,11 @@ import { Link } from 'react-router-dom';
 interface AuthFormProps {
   mode: 'signin' | 'signup';
   redirectUrl?: string;
+  disableSessionRedirect?: boolean; // ✅ Add this
 }
 
-export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
+
+export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedirect = false }: AuthFormProps) {
   const { login, register, loginWithGoogle, loginWithApple } = useFirebaseAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -48,10 +50,18 @@ export default function AuthForm({ mode, redirectUrl = '/' }: AuthFormProps) {
   
       // Call correct auth flow
       if (mode === 'signup') {
-        await register(email, password, redirectUrl);
+        if (!disableSessionRedirect) {
+          await register(email, password, redirectUrl);
+        } else {
+          await register(email, password);
+        }
       } else {
-        await login(email, password, redirectUrl, rememberMe);
-      }
+        if (!disableSessionRedirect) {
+          await login(email, password, redirectUrl, rememberMe);
+        } else {
+          await login(email, password, undefined, rememberMe);
+        }
+      }      
   
     } catch (err: any) {
       const friendly = mapFirebaseError(err.code);

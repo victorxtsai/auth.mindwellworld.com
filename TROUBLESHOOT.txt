@@ -26,6 +26,7 @@ npm run deploy
 BUILD BACKEND
 firebase deploy
 
+firebase functions:secrets:access REVENUECAT_API_KEY
 
 
 ---

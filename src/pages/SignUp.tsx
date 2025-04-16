@@ -9,16 +9,15 @@ export default function SignUp() {
   const [hasAttemptedCheckout, setHasAttemptedCheckout] = useState(false);
   const location = useLocation();
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const redirectParam = params.get('redirect');
-    const shouldRedirectToCheckout = params.get('redirectToCheckout') === 'true';
-    const tier = params.get('tier');
+  const params = new URLSearchParams(location.search);
+  const redirectParam = params.get('redirect');
+  const shouldRedirectToCheckout = params.get('redirectToCheckout') === 'true';
+  const tier = params.get('tier');
 
+  useEffect(() => {
     console.log('🔍 redirect param:', redirectParam);
     console.log('🛒 shouldRedirectToCheckout:', shouldRedirectToCheckout);
     console.log('🏷️ tier:', tier);
-
     if (redirectParam) {
       setRedirectUrl(redirectParam);
     }
@@ -28,7 +27,7 @@ export default function SignUp() {
 
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
-          setHasAttemptedCheckout(true); // ✅ Prevent multiple runs
+          setHasAttemptedCheckout(true);
 
           try {
             const idToken = await user.getIdToken();
@@ -68,7 +67,11 @@ export default function SignUp() {
 
   return (
     <AuthLayout title="Create An Account">
-      <AuthForm mode="signup" redirectUrl={redirectUrl} />
+      <AuthForm
+        mode="signup"
+        redirectUrl={redirectUrl}
+        disableSessionRedirect={shouldRedirectToCheckout} // ✅ Add this line
+      />
     </AuthLayout>
   );
 }
