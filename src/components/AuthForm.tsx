@@ -37,11 +37,13 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log("AuthForm | handleSubmit", mode)
     e.preventDefault();
     setError('');
   
     try {
       // Save or remove email for "Remember me"
+      console.log("AuthForm | rememberMe", rememberMe, email)
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email);
       } else {
@@ -50,12 +52,14 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
   
       // Call correct auth flow
       if (mode === 'signup') {
+        console.log("AuthForm | signup", email, password, redirectUrl)
         if (!disableSessionRedirect) {
           await register(email, password, redirectUrl);
         } else {
-          await register(email, password);
+          await register(email, password, undefined);
         }
       } else {
+        console.log("AuthForm | signin", email, password, redirectUrl)
         if (!disableSessionRedirect) {
           await login(email, password, rememberMe, redirectUrl);
         } else {
