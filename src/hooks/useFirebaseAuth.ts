@@ -22,31 +22,20 @@ export const callCreateSession = async (user: User, redirectUrl: string = '/') =
 
   try {
     if (redirectUrl) {
-      const url = new URL(redirectUrl, `https://${fallbackDomain}`);
-      const domain = url.hostname;
-
-      const allowedDomains = [
-        'mindwell.io',
-        'mel.mindwell.io',
-        'mel.ai',
-        'mindwellworld.com',
-        'auth.mindwellworld.com',
-      ];
-
-      const isValidDomain = allowedDomains.includes(domain);
       const isMobileDeepLink = redirectUrl.startsWith('mindwellapp://');
 
-      if (isValidDomain && !isMobileDeepLink) {
-        // ✅ Redirect back to original allowed domain
-        window.location.href = `https://${domain}/redirect?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`;
+      if (!isMobileDeepLink) {
+        // ✅ Redirect back to original redirect URL
+        const encodedRedirect = encodeURIComponent(redirectUrl);
+        window.location.href = `https://${fallbackDomain}/redirect?token=${idToken}&redirect=${encodedRedirect}`;
         return;
       }
     }
 
-    // 🚨 If redirect is invalid or not allowed, try mobile deep link
+    // 🚨 If no redirect or it's a mobile deep link, try mobile app
     window.location.href = mobileAppURL;
 
-    // 🛑 If mobile app doesn’t open it, fallback to mindwell.io
+    // 🛑 Fallback if mobile deep link doesn't open
     setTimeout(() => {
       window.location.href = fallbackWebURL;
     }, 1500);

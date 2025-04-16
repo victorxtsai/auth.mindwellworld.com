@@ -13,45 +13,33 @@ export default function SignUp() {
     const redirectParam = params.get('redirect');
     const shouldRedirectToCheckout = params.get('redirectToCheckout') === 'true';
     const tier = params.get('tier');
+
     console.log('🔍 redirect param:', redirectParam);
     console.log('🛒 shouldRedirectToCheckout:', shouldRedirectToCheckout);
     console.log('🏷️ tier:', tier);
 
-    const allowedDomains = [
-      'mindwell.io',
-      'mel.mindwell.io',
-      'mel.ai',
-      'mindwellworld.com',
-      'auth.mindwellworld.com',
-    ];
-
-    try {
-      if (redirectParam) {
-        const url = new URL(redirectParam);
-        if (allowedDomains.includes(url.hostname)) {
-          setRedirectUrl(redirectParam);
-        } else {
-          console.warn('❌ Disallowed redirect domain:', url.hostname);
-        }
-      }
-    } catch (e) {
-      console.error('Invalid redirect param:', e);
+    // ✅ Accept all redirects now
+    if (redirectParam) {
+      setRedirectUrl(redirectParam);
     }
 
     // 👇 Stripe checkout after signup
     if (shouldRedirectToCheckout && tier) {
       const auth = getAuth();
+
       const unsubscribe = onAuthStateChanged(auth, async (user) => {
         if (user) {
           try {
+            const idToken = await user.getIdToken();
+
             const res = await fetch('/api/startCheckoutSession', {
               method: 'POST',
               credentials: 'include',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                userId: user.uid,
-                tier,
-              }),
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ tier }),
             });
 
             const { checkoutUrl } = await res.json();
@@ -63,12 +51,15 @@ export default function SignUp() {
           } catch (err) {
             console.error('❌ Error starting checkout session:', err);
           } finally {
-            unsubscribe();
+            unsubscribe(); // ✅ Clean up
           }
         }
       });
+
+      return () => unsubscribe(); // clean up on unmount
     }
   }, [location.search]);
+
 
   return (
     <AuthLayout title="Create An Account">
