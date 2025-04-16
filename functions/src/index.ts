@@ -10,7 +10,7 @@ export { revenuecatWebhook } from './revenuecatWebhook';
 
 const cors = corsLib({ origin: true, credentials: true });
 
-export const setSession = functions.https.onRequest((req, res) => {
+export const setSession_Auth_MindwellWorld_Com = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     try {
       const token = req.query.token as string;
@@ -47,13 +47,13 @@ export const setSession = functions.https.onRequest((req, res) => {
         res.redirect(`/redirect?redirect=${encodedRedirect}`);
       }
     } catch (err) {
-      console.error('[setSession] Error:', err);
+      console.error('[setSession_Auth_MindwellWorld_Com] Error:', err);
       res.status(500).send('Failed to create session');
     }
   });
 });
 
-export const checkAuth = functions.https.onRequest((req, res) => {
+export const checkAuth_Auth_MindwellWorld_Com = functions.https.onRequest((req, res) => {
   cors(req, res, async () => {
     const cookies = cookie.parse(req.headers.cookie || '');
     const session = cookies.session || '';
@@ -67,7 +67,7 @@ export const checkAuth = functions.https.onRequest((req, res) => {
   });
 });
 
-export const logout = functions.https.onRequest((req, res) => {
+export const logout_Auth_MindwellWorld_Com = functions.https.onRequest((req, res) => {
   res.setHeader(
     'Set-Cookie',
     cookie.serialize('session', '', {

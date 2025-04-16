@@ -24,12 +24,12 @@
       "**/node_modules/**"
     ],
     "rewrites": [
-      { "source": "/setSession", "function": "setSession" },
-      { "source": "/checkAuth", "function": "checkAuth" },
-      { "source": "/logout", "function": "logout" },
+      { "source": "/api/setSession_Auth_MindwellWorld_Com", "function": "setSession" },
+      { "source": "/api/checkAuth_Auth_MindwellWorld_Com", "function": "checkAuth" },
+      { "source": "/api/logout_Auth_MindwellWorld_Com", "function": "logout" },
       { "source": "/api/startCheckoutSession", "function": "startCheckoutSession"},
       { "source": "/api/revenuecatWebhook", "function": "revenuecatWebhook"},
-      { "source": "**", "destination": "/index.html" },
+      { "source": "**", "destination": "/index.html" }
 
     ]
   }

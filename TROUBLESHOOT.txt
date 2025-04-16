@@ -18,11 +18,12 @@ git push
 View Website
 npm run dev
 
-Build Website
+Build Website - FRONT END
 npm run build
 cp dist/index.html dist/404.html
 npm run deploy
 
+BUILD BACKEND
 firebase deploy
 
 

@@ -5,40 +5,67 @@ import {
   signInWithPopup,
   OAuthProvider,
   sendEmailVerification,
+  setPersistence,
+  browserLocalPersistence,
+  browserSessionPersistence,
   User,
-  setPersistence, browserLocalPersistence, browserSessionPersistence
 } from 'firebase/auth';
 import { auth } from '@/src/firebaseConfig';
 
 
-const callCreateSession = async (user: User, redirectUrl: string = '/') => {
+export const callCreateSession = async (user: User, redirectUrl: string = '/') => {
   const idToken = await user.getIdToken();
 
-  // Extract domain from redirectUrl (or default to mindwell.io)
-  const url = new URL(redirectUrl, 'https://mindwell.io'); // Fallback ensures URL object is valid
-  let domain = url.hostname;
+  const fallbackDomain = 'mindwell.io';
+  const mobileAppURL = `mindwellapp://setSession?token=${idToken}`;
+  const fallbackWebURL = `https://${fallbackDomain}/redirect?token=${idToken}`;
 
-  // Optional: Lock allowed domains (to avoid misuse)
-  const allowedDomains = ['mindwell.io', 'mel.mindwell.io', 'mel.ai', 'mindwellworld.com', 'auth.mindwellworld.com'];
-  if (!allowedDomains.includes(domain)) {
-    domain = 'mindwell.io';
+  try {
+    if (redirectUrl) {
+      const url = new URL(redirectUrl, `https://${fallbackDomain}`);
+      const domain = url.hostname;
+
+      const allowedDomains = [
+        'mindwell.io',
+        'mel.mindwell.io',
+        'mel.ai',
+        'mindwellworld.com',
+        'auth.mindwellworld.com',
+      ];
+
+      const isValidDomain = allowedDomains.includes(domain);
+      const isMobileDeepLink = redirectUrl.startsWith('mindwellapp://');
+
+      if (isValidDomain && !isMobileDeepLink) {
+        // ✅ Redirect back to original allowed domain
+        window.location.href = `https://${domain}/redirect?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`;
+        return;
+      }
+    }
+
+    // 🚨 If redirect is invalid or not allowed, try mobile deep link
+    window.location.href = mobileAppURL;
+
+    // 🛑 If mobile app doesn’t open it, fallback to mindwell.io
+    setTimeout(() => {
+      window.location.href = fallbackWebURL;
+    }, 1500);
+  } catch (err) {
+    // 🔁 Total fallback
+    window.location.href = fallbackWebURL;
   }
-
-  // Handle mobile deep linking
-  const isMobile = redirectUrl.startsWith('mindwellapp://');
-  const sessionURL = isMobile
-    ? `mindwellapp://setSession?token=${idToken}`
-    : `https://${domain}/redirect?token=${idToken}&redirect=${encodeURIComponent(redirectUrl)}`;
-
-
-  // Go to domain to set the cookie
-  window.location.href = sessionURL;
 };
 
 
 
+
 export function useFirebaseAuth() {
-  const login = async (email: string, password: string, redirectUrl: string = '/', rememberMe: boolean) => {
+  const login = async (
+    email: string,
+    password: string,
+    redirectUrl: string = '/',
+    rememberMe: boolean
+  ) => {
     await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     await callCreateSession(userCredential.user, redirectUrl);
