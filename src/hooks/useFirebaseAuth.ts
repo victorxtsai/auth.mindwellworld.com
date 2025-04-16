@@ -52,30 +52,42 @@ export function useFirebaseAuth() {
   const login = async (
     email: string,
     password: string,
-    redirectUrl: string = '/',
-    rememberMe: boolean
+    rememberMe: boolean,
+    redirectUrl?: string,
   ) => {
     await setPersistence(auth, rememberMe ? browserLocalPersistence : browserSessionPersistence);
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    await callCreateSession(userCredential.user, redirectUrl);
+    if (redirectUrl) {
+      await callCreateSession(userCredential.user, redirectUrl); // ✅ only if redirectUrl exists
+    }
   };
 
-  const register = async (email: string, password: string, redirectUrl: string = '/') => {
+  const register = async (    
+    email: string,
+    password: string,
+    redirectUrl?: string,
+  ) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     await sendEmailVerification(userCredential.user);
-    await callCreateSession(userCredential.user, redirectUrl);
+    if (redirectUrl) {
+      await callCreateSession(userCredential.user, redirectUrl); // ✅ only if redirectUrl exists
+    }
   };
 
-  const loginWithGoogle = async (redirectUrl: string = '/') => {
+  const loginWithGoogle = async (redirectUrl?: string) => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
-    await callCreateSession(result.user, redirectUrl);
+    if (redirectUrl) {
+      await callCreateSession(result.user, redirectUrl);
+    }
   };
-
-  const loginWithApple = async (redirectUrl: string = '/') => {
+  
+  const loginWithApple = async (redirectUrl?: string) => {
     const provider = new OAuthProvider('apple.com');
     const result = await signInWithPopup(auth, provider);
-    await callCreateSession(result.user, redirectUrl);
+    if (redirectUrl) {
+      await callCreateSession(result.user, redirectUrl);
+    }
   };
 
   return {

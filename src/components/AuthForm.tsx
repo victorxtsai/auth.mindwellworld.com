@@ -57,9 +57,9 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
         }
       } else {
         if (!disableSessionRedirect) {
-          await login(email, password, redirectUrl, rememberMe);
+          await login(email, password, rememberMe, redirectUrl);
         } else {
-          await login(email, password, undefined, rememberMe);
+          await login(email, password, rememberMe, undefined);
         }
       }      
   
