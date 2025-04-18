@@ -9,7 +9,6 @@ interface AuthFormProps {
   disableSessionRedirect?: boolean; // ✅ Add this
 }
 
-
 export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedirect = false }: AuthFormProps) {
   const { login, register, loginWithGoogle, loginWithApple } = useFirebaseAuth();
   const [email, setEmail] = useState('');
@@ -18,7 +17,6 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
 
   const mapFirebaseError = (code: string) => {
     switch (code) {
@@ -76,7 +74,6 @@ export default function AuthForm({ mode, redirectUrl = '/', disableSessionRedire
       setIsSubmitting(false); // allow retry
     }
   };
-
   
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

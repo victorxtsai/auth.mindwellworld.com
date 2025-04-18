@@ -28,6 +28,7 @@
       { "source": "/api/checkAuth_Auth_MindwellWorld_Com", "function": "checkAuth" },
       { "source": "/api/logout_Auth_MindwellWorld_Com", "function": "logout" },
       { "source": "/api/startCheckoutSession", "function": "startCheckoutSession"},
+      { "source": "/api/startStripeCheckoutSession", "function": "startStripeCheckoutSession"},
       { "source": "/api/revenuecatWebhook", "function": "revenuecatWebhook"},
       { "source": "**", "destination": "/index.html" }
 

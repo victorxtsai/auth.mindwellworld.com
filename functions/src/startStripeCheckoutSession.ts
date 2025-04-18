@@ -41,7 +41,7 @@ export const startStripeCheckoutSession = onRequest(
         payment_method_types: ['card'],
         line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
         metadata: {
-          firebase_uid: uid,
+          FirebaseUserID: uid,
         },
         success_url: `${domain}/success?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${domain}/cancel`,

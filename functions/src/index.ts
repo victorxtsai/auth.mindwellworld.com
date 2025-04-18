@@ -7,6 +7,8 @@ admin.initializeApp();
 
 export { startCheckoutSession } from './startCheckoutSession';
 export { revenuecatWebhook } from './revenuecatWebhook';
+// export { stripeToRevenueCatWebhook } from './stripeToRevenueCatWebhook';
+export { startStripeCheckoutSession } from './startStripeCheckoutSession';
 
 const cors = corsLib({ origin: true, credentials: true });
 

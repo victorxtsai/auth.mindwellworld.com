@@ -17,7 +17,7 @@ export const callCreateSession = async (user: User, redirectUrl: string = '/') =
   const idToken = await user.getIdToken();
 
   const fallbackDomain = 'mindwell.io';
-  const mobileAppURL = `mindwellapp://setSession?token=${idToken}`;
+  const mobileAppURL = `mindwellapp://setSession?token=${idToken}&uid=${user.uid}`;
   const fallbackWebURL = `https://${fallbackDomain}/redirect?token=${idToken}`;
 
   try {
@@ -27,7 +27,7 @@ export const callCreateSession = async (user: User, redirectUrl: string = '/') =
       if (!isMobileDeepLink) {
         // ✅ Redirect back to original redirect URL
         const encodedRedirect = encodeURIComponent(redirectUrl);
-        window.location.href = `https://${fallbackDomain}/redirect?token=${idToken}&redirect=${encodedRedirect}`;
+        window.location.href = `https://${fallbackDomain}/redirect?token=${idToken}&uid=${user.uid}&redirect=${encodedRedirect}`;
         return;
       }
     }
